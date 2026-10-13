@@ -80,6 +80,7 @@ h1{font-size:21px;font-weight:400;margin:0 0 8px;text-align:center;letter-spacin
 #pdfv iframe{flex:1;border:0;width:100%}
 #out{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .35s;z-index:9}
 #out.on{opacity:1}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:8}
 @media (max-width:480px){.inner{padding:28px 20px 22px}.foot{padding:12px 20px}.pct .n{font-size:34px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -237,7 +238,13 @@ function fetchData(t){
     step(4);setTarget(97);
     setTimeout(function(){
       if(PDF) return openPdf(r.b64,function(){finish();});
-      finish(function(){document.open();document.write(r.html);document.close();});
+      finish(function(){
+        // el panel corre en su propio documento (marco a pantalla completa), sin mezclar su código con esta página
+        var f=document.createElement("iframe");f.id="app";f.title="Panel";
+        f.src=URL.createObjectURL(new Blob([r.html],{type:"text/html;charset=utf-8"}));
+        f.onload=function(){try{document.title=f.contentDocument.title||document.title;}catch(e){}$("stage").style.display="none";$("out").classList.remove("on");};
+        document.body.appendChild(f);
+      });
     },250);
   }).catch(function(e){
     clearInterval(waitTimer);
