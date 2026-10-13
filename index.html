@@ -8,91 +8,285 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;--ink:#222;--mut:#6b6b6b;--line:#dcdcdc;--acc:#96323C}
+:root{--bg:#f6f6f6;--card:#fff;--ink:#1e1e1e;--mut:#707070;--soft:#a3a3a3;--line:#e2e2e2;--track:#ececec;--acc:#96323C;--acc2:#b85a63}
 *{box-sizing:border-box;font-family:Roboto,Arial,sans-serif}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink)}
-#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:16px}
-.card{width:100%;max-width:420px;border:1px solid var(--line);border-top:4px solid var(--acc);padding:32px 28px;text-align:center}
-.logos{display:flex;justify-content:center;align-items:center;gap:20px;margin-bottom:22px}
-.logos img{height:34px;filter:grayscale(1)}
-h1{font-size:20px;font-weight:500;margin:0 0 6px}
-p{font-size:14px;color:var(--mut);margin:0 0 22px;line-height:1.45}
+html,body{margin:0;height:100%;color:var(--ink);background:var(--bg)}
+body{background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;background-position:-1px -1px}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(246,246,246,.55) 0,var(--bg) 70%);pointer-events:none}
+
+#stage{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--line);box-shadow:0 18px 50px -24px rgba(0,0,0,.25);position:relative;overflow:hidden;animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+.card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:var(--acc)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.inner{padding:34px 32px 26px}
+.logos{display:flex;justify-content:center;align-items:center;gap:22px;margin-bottom:26px}
+.logos img{height:32px;filter:grayscale(1)}
+.logos i{width:1px;height:26px;background:var(--line)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);text-align:center;margin-bottom:6px}
+h1{font-size:21px;font-weight:400;margin:0 0 8px;text-align:center;letter-spacing:-.01em}
+.sub{font-size:13.5px;color:var(--mut);margin:0 0 24px;line-height:1.5;text-align:center}
+.sub b{color:var(--ink);font-weight:500}
 #gbtn{display:flex;justify-content:center;min-height:44px}
-#msg{font-size:13px;margin-top:16px;min-height:18px;color:var(--mut)}
-#msg.err{color:var(--acc)}
-#bar{position:sticky;top:0;z-index:2;background:#fff;padding:8px 12px;font-size:13px;border-bottom:3px solid var(--acc);display:flex;gap:12px;align-items:center}
-#bar button{color:var(--acc);background:none;border:0;cursor:pointer;font:inherit;text-decoration:underline;padding:0}
-#pdfv{display:none;height:100%;flex-direction:column}
+.foot{border-top:1px solid var(--line);padding:12px 32px;font-size:11.5px;color:var(--soft);display:flex;justify-content:space-between;gap:8px}
+.foot span{white-space:nowrap}.foot span:last-child{text-align:right;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* vistas */
+.view{display:none}.view.on{display:block;animation:fade .35s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* carga */
+.who{display:flex;align-items:center;gap:10px;justify-content:center;font-size:12.5px;color:var(--mut);margin-bottom:22px}
+.who .av{width:26px;height:26px;border-radius:50%;background:#efefef;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--ink)}
+.doc{display:flex;gap:14px;align-items:center;border:1px solid var(--line);padding:12px 14px;margin-bottom:22px;text-align:left}
+.doc .ico{flex:none;width:34px;height:42px;position:relative;border:1.5px solid var(--ink);border-radius:2px;background:#fff}
+.doc .ico::after{content:"";position:absolute;right:-1.5px;top:-1.5px;width:10px;height:10px;background:var(--card);border-left:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink)}
+.doc .ico b{position:absolute;left:3px;bottom:5px;font-size:8.5px;font-weight:700;color:#fff;background:var(--acc);padding:1px 3px;letter-spacing:.04em}
+.doc .meta{min-width:0}
+.doc .nm{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.doc .tags span{font-size:11px;color:var(--mut);background:#f3f3f3;padding:2px 7px}
+.pct{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.pct .n{font-size:40px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+.pct .n small{font-size:18px;color:var(--soft);margin-left:2px}
+.pct .sz{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;text-align:right}
+.track{height:6px;background:var(--track);position:relative;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.done .fill::after{display:none}
+.steps{list-style:none;margin:22px 0 0;padding:0}
+.steps li{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--soft);padding:7px 0;transition:color .3s}
+.steps li .st{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid #d3d3d3;position:relative;transition:all .3s}
+.steps li .t{flex:1}
+.steps li .tm{font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--soft)}
+.steps li.act{color:var(--ink)}
+.steps li.act .st{border-color:var(--acc);border-right-color:transparent;animation:spin .8s linear infinite}
+.steps li.ok{color:var(--mut)}
+.steps li.ok .st{border-color:var(--ink);background:var(--ink)}
+.steps li.ok .st::after{content:"";position:absolute;left:5px;top:2px;width:4px;height:8px;border:solid #fff;border-width:0 1.6px 1.6px 0;transform:rotate(45deg)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{margin-top:18px;border-left:3px solid var(--acc);background:#faf3f4;padding:10px 12px;font-size:13px;color:#5b1f25;display:none}
+.err.on{display:block}
+.btn{display:inline-block;margin-top:10px;font-size:12.5px;color:var(--acc);background:none;border:1px solid var(--acc);padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--acc);color:#fff}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--mut);text-decoration:underline;cursor:pointer;font-size:12px}
+
+/* visor PDF */
+#pdfv{display:none;position:fixed;inset:0;flex-direction:column;background:#fff;z-index:5}
+#pdfv .bar{display:flex;gap:16px;align-items:center;padding:9px 14px;font-size:13px;border-bottom:3px solid var(--acc);background:#fff}
+#pdfv .bar b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pdfv .bar button{color:var(--acc);background:none;border:0;cursor:pointer;font:inherit;padding:0}
+#pdfv .bar button:hover{text-decoration:underline}
 #pdfv iframe{flex:1;border:0;width:100%}
+#out{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .35s;z-index:9}
+#out.on{opacity:1}
+@media (max-width:480px){.inner{padding:28px 20px 22px}.foot{padding:12px 20px}.pct .n{font-size:34px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer onload="initGsi()"></script>
 </head>
 <body>
-<div id="login">
+<div id="stage">
   <div class="card">
-    <div class="logos"><img src="situ.png" alt="SITU"><img src="aspen.png" alt="Aspen Capital"></div>
-    <h1>Fondos de Inversión Inmobiliarios</h1>
-    <p>Acceso exclusivo para cuentas <b>@situ.cl</b>.<br>Inicia sesión con tu cuenta Google de SITU.</p>
-    <div id="gbtn"></div>
-    <div id="msg"></div>
+    <div class="inner">
+      <div class="logos"><img src="situ.png" alt="SITU"><i></i><img src="aspen.png" alt="Aspen Capital"></div>
+
+      <div id="vLogin" class="view on">
+        <div class="eyebrow">Inteligencia inmobiliaria</div>
+        <h1>Fondos de Inversión Inmobiliarios</h1>
+        <p class="sub">Panel de los fondos públicos inmobiliarios de Chile.<br>Acceso exclusivo para cuentas <b>@situ.cl</b>.</p>
+        <div id="gbtn"></div>
+        <div class="err" id="eLogin"></div>
+      </div>
+
+      <div id="vLoad" class="view">
+        <div class="who" id="who"></div>
+        <div class="doc" id="doc"></div>
+        <div id="prog">
+          <div class="pct"><div class="n" id="pn">0<small>%</small></div><div class="sz" id="sz"></div></div>
+          <div class="track"><div class="fill" id="fill"></div></div>
+        </div>
+        <ul class="steps" id="steps"></ul>
+        <div class="err" id="eLoad"></div>
+      </div>
+    </div>
+    <div class="foot"><span>Fuentes: AGF · CMF · SII</span><span id="fr">Actualización mensual</span></div>
   </div>
 </div>
-<div id="pdfv"><div id="bar"><b id="pname"></b><button id="dl">Descargar PDF</button><button id="salir">Cerrar sesión</button></div><iframe id="pframe" title="PDF"></iframe></div>
+
+<div id="pdfv"><div class="bar"><b id="pname"></b><button id="dl">Descargar PDF</button><button id="cerrar">Cerrar</button></div><iframe id="pframe" title="Documento PDF"></iframe></div>
+<div id="out"></div>
+
 <script>
 var CLIENT_ID = "138206776381-eep6qsc0nu0ceb2k6gjd6mgbk10d3c7g.apps.googleusercontent.com";
 var API = "https://script.google.com/macros/s/AKfycbw2paSycuLxl7SMN4rs1fjsA7XU8p1wSXCVvP5Q73zU580DWEXFGrSHSms5lbGhQoWE/exec";
-var KEY = "situ_fondos_idt";
-var PDF = new URLSearchParams(location.search).get("pdf");
+var KEY = "situ_fondos_idt", KSZ = "situ_fondos_sz";
+var Q = new URLSearchParams(location.search);
+var PDF = Q.get("pdf"), KB = parseInt(Q.get("kb") || "0", 10) || 0;
 
-function msg(t, err){var m=document.getElementById("msg");m.textContent=t||"";m.className=err?"err":"";}
-function saved(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&o.exp*1000>Date.now()+60000)return o.t;}catch(e){}return null;}
-function save(t){try{var p=JSON.parse(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));localStorage.setItem(KEY,JSON.stringify({t:t,exp:p.exp}));}catch(e){}}
-function clear(){try{localStorage.removeItem(KEY);}catch(e){}}
+function $(id){return document.getElementById(id);}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+function claims(t){try{return JSON.parse(decodeURIComponent(escape(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))));}catch(e){return {};}}
+function saved(){try{var o=JSON.parse(ls(KEY)||"null");if(o&&o.exp*1000>Date.now()+60000)return o.t;}catch(e){}return null;}
+function save(t){var p=claims(t);if(p.exp)ls(KEY,JSON.stringify({t:t,exp:p.exp}));}
+function mb(b){return (b/1048576).toLocaleString("es-CL",{minimumFractionDigits:1,maximumFractionDigits:1})+" MB";}
+function show(id){["vLogin","vLoad"].forEach(function(v){$(v).classList.toggle("on",v===id);});}
 
-function api(t, body){
-  body.t = t;
-  return fetch(API,{method:"POST",body:JSON.stringify(body)}).then(function(r){return r.json();});
+/* ---------- descripción de lo que se carga ---------- */
+var TIPOS={"EEFF-Notas":"EEFF y notas","Analisis-Razonado":"Análisis razonado","Folleto":"Folleto","Trimestral":"Reporte trimestral"};
+function docInfo(){
+  if(!PDF) return {nm:"Panel de fondos inmobiliarios",tags:["204 fondos","39 administradoras","Valores en UF"],badge:"HTML"};
+  var a=PDF.split("/")[0], f=PDF.split("/").pop();
+  var m=f.match(/^(\d{3})_[^_]+_(.+?)_(\d{4})-(\d{2})(?:_(.+))?\.pdf$/i);
+  var tags=[a];
+  if(m){
+    var meses=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+    tags.push("Fondo "+m[1]);tags.push(meses[+m[4]-1]+"-"+m[3]);tags.push(TIPOS[m[5]]||"Factsheet / reporte");
+    return {nm:m[2].replace(/-/g," "),tags:tags,badge:"PDF",file:f};
+  }
+  return {nm:f,tags:tags,badge:"PDF",file:f};
+}
+function paintDoc(){
+  var d=docInfo();
+  $("doc").innerHTML='<div class="ico"><b>'+d.badge+'</b></div><div class="meta"><div class="nm"></div><div class="tags">'+d.tags.map(function(t){return "<span>"+t.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";
+  $("doc").querySelector(".nm").textContent=d.nm;
 }
 
-function load(t){
-  msg(PDF ? "Abriendo documento…" : "Cargando panel…");
-  api(t, PDF ? {op:"pdf", pdf:PDF} : {op:"panel"}).then(function(r){
-    if(!r.ok){
-      if(r.err==="auth"){clear();msg(r.msg||"Sesión no válida. Vuelve a iniciar sesión.",true);renderBtn();return;}
-      msg(r.msg||"No se pudo cargar.",true);return;
+/* ---------- barra de progreso ---------- */
+var STEPS=["Conexión segura","Verificación de la cuenta @situ.cl","Lectura desde el repositorio privado","Descarga","Preparación"];
+var P={v:0,target:0,t0:0,stepT:[],cur:-1,raf:0};
+function paintSteps(){
+  $("steps").innerHTML=STEPS.map(function(s,i){
+    var label=i===3?(PDF?"Descarga del documento":"Descarga del panel"):(i===4?(PDF?"Apertura del documento":"Armado del panel"):s);
+    return '<li id="s'+i+'"><span class="st"></span><span class="t">'+label+'</span><span class="tm" id="tm'+i+'"></span></li>';
+  }).join("");
+}
+function step(i){
+  var now=performance.now();
+  for(var k=0;k<STEPS.length;k++){
+    var li=$("s"+k);if(!li)continue;
+    if(k<i){if(!li.classList.contains("ok")){li.className="ok";if(P.stepT[k]!=null)$("tm"+k).textContent=((now-P.stepT[k])/1000).toFixed(1)+" s";}}
+    else if(k===i){if(li.className!=="act"){li.className="act";P.stepT[k]=now;}}
+    else li.className="";
+  }
+  P.cur=i;
+}
+function setTarget(x){P.target=Math.max(P.target,Math.min(x,100));}
+function tick(){
+  // avanza suave hacia el objetivo; mientras se espera al servidor, se acerca lento a su techo
+  var d=P.target-P.v; P.v+=d>0?Math.max(d*0.12,0.05):0; if(P.v>P.target)P.v=P.target;
+  var n=Math.floor(P.v);
+  $("pn").innerHTML=n+"<small>%</small>";
+  $("fill").style.width=P.v.toFixed(2)+"%";
+  if(P.v<100||P.target<100) P.raf=requestAnimationFrame(tick);
+}
+var waitTimer=0;
+function creep(from,to,ms){ // avance estimado mientras el servidor trabaja (no hay bytes que medir aún)
+  clearInterval(waitTimer);var t0=performance.now();
+  waitTimer=setInterval(function(){var k=1-Math.exp(-(performance.now()-t0)/ms);setTarget(from+(to-from)*k);},80);
+}
+
+/* ---------- flujo ---------- */
+function startLoading(t){
+  var c=claims(t);
+  $("who").innerHTML='<span class="av">'+((c.given_name||c.email||"?")[0]||"?").toUpperCase()+'</span><span></span>';
+  $("who").lastChild.textContent=(c.email||"")+" · ";
+  var b=document.createElement("button");b.className="link";b.textContent="cambiar cuenta";b.onclick=logout;$("who").appendChild(b);
+  paintDoc();paintSteps();$("eLoad").classList.remove("on");$("prog").classList.remove("done");
+  P.v=0;P.target=0;$("sz").textContent="";
+  show("vLoad");cancelAnimationFrame(P.raf);P.raf=requestAnimationFrame(tick);
+  step(0);setTarget(4);
+  setTimeout(function(){if(P.cur===0){step(1);creep(6,18,900);}},350);
+  setTimeout(function(){if(P.cur===1){step(2);creep(18,55,PDF?2200:3500);}},1300);
+  fetchData(t);
+}
+
+function expected(){
+  if(PDF&&KB) return Math.round(KB*1024*4/3)+120;      // PDF en base64 dentro del JSON
+  var s=parseInt(ls(KSZ)||"0",10); return s>0?s:(PDF?0:2400000);
+}
+
+function fetchData(t){
+  var body=JSON.stringify(PDF?{op:"pdf",pdf:PDF,t:t}:{op:"panel",t:t});
+  fetch(API,{method:"POST",body:body}).then(function(r){
+    clearInterval(waitTimer);
+    if(P.cur<3){step(3);}
+    setTarget(58);
+    var total=parseInt(r.headers.get("content-length")||"0",10)||expected();
+    if(!r.body||!r.body.getReader) return r.text().then(function(x){return x;});
+    var rd=r.body.getReader(),chunks=[],got=0;
+    function pump(){
+      return rd.read().then(function(o){
+        if(o.done){var u=new Uint8Array(got),p=0;chunks.forEach(function(c){u.set(c,p);p+=c.length;});
+          if(!PDF)ls(KSZ,String(got));
+          return new TextDecoder("utf-8").decode(u);}
+        chunks.push(o.value);got+=o.value.length;
+        var f=total?Math.min(got/total,0.995):1-Math.exp(-got/1500000);
+        setTarget(58+f*36);
+        $("sz").textContent=total?mb(Math.min(got,total))+" de "+mb(Math.max(total,got)):mb(got);
+        return pump();
+      });
     }
-    if(PDF) return showPdf(r.b64);
-    document.open();document.write(r.html);document.close();
-  }).catch(function(e){msg("Error de conexión: "+e.message,true);});
+    return pump();
+  }).then(function(txt){
+    var r;try{r=JSON.parse(txt);}catch(e){throw new Error("respuesta inesperada del servidor");}
+    if(!r.ok){
+      if(r.err==="auth"){ls(KEY,null);backToLogin(r.msg||"Tu sesión venció. Vuelve a iniciar sesión.");return;}
+      throw new Error(r.msg||"no se pudo cargar");
+    }
+    step(4);setTarget(97);
+    setTimeout(function(){
+      if(PDF) return openPdf(r.b64,function(){finish();});
+      finish(function(){document.open();document.write(r.html);document.close();});
+    },250);
+  }).catch(function(e){
+    clearInterval(waitTimer);
+    var li=$("s"+P.cur);if(li)li.className="";
+    $("eLoad").innerHTML="No se pudo completar la carga ("+String(e.message||e).replace(/</g,"&lt;")+").<br>";
+    var b=document.createElement("button");b.className="btn";b.textContent="Reintentar";b.onclick=function(){startLoading(t);};
+    $("eLoad").appendChild(b);$("eLoad").classList.add("on");
+  });
 }
 
-function showPdf(b64){
+function finish(cb){
+  setTarget(100);step(5);$("prog").classList.add("done");
+  $("sz").textContent=$("sz").textContent||"Listo";
+  setTimeout(function(){$("out").classList.add("on");setTimeout(function(){if(cb)cb();},380);},450);
+}
+
+function openPdf(b64,done){
   var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-  var url=URL.createObjectURL(new Blob([u],{type:"application/pdf"}));
-  var name=PDF.split("/").pop();
-  document.title=name;
-  document.getElementById("login").style.display="none";
-  document.getElementById("pdfv").style.display="flex";
-  document.getElementById("pname").textContent=name;
-  document.getElementById("pframe").src=url;
-  document.getElementById("dl").onclick=function(){var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
-  document.getElementById("salir").onclick=function(){clear();location.href=location.pathname;};
+  var url=URL.createObjectURL(new Blob([u],{type:"application/pdf"})),name=PDF.split("/").pop();
+  done();
+  setTimeout(function(){
+    document.title=name;$("pname").textContent=name;$("pframe").src=url;$("pdfv").style.display="flex";$("out").classList.remove("on");
+    $("dl").onclick=function(){var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
+    $("cerrar").onclick=function(){if(window.opener||history.length<2)window.close();location.href=location.pathname;};
+  },850);
 }
 
-function onCred(resp){save(resp.credential);load(resp.credential);}
+function backToLogin(m){
+  show("vLogin");renderBtn();
+  if(m){$("eLogin").textContent=m;$("eLogin").classList.add("on");}
+}
+function logout(){ls(KEY,null);try{google.accounts.id.disableAutoSelect();}catch(e){}location.href=location.pathname+location.search;}
 
+function onCred(resp){
+  var c=claims(resp.credential);
+  if(c.hd!=="situ.cl"){backToLogin("Esa cuenta no es @situ.cl. Ingresa con tu cuenta de SITU.");return;}
+  $("eLogin").classList.remove("on");save(resp.credential);startLoading(resp.credential);
+}
 function renderBtn(){
-  document.getElementById("gbtn").innerHTML="";
-  google.accounts.id.renderButton(document.getElementById("gbtn"),{theme:"outline",size:"large",text:"signin_with",shape:"rectangular",locale:"es"});
+  $("gbtn").innerHTML="";
+  google.accounts.id.renderButton($("gbtn"),{theme:"outline",size:"large",text:"signin_with",shape:"rectangular",locale:"es",width:280});
 }
-
 function initGsi(){
   google.accounts.id.initialize({client_id:CLIENT_ID,callback:onCred,auto_select:true,hd:"situ.cl",ux_mode:"popup"});
   var t=saved();
-  if(t){load(t);return;}
-  renderBtn();
-  google.accounts.id.prompt();
+  if(t){startLoading(t);return;}
+  renderBtn();google.accounts.id.prompt();
 }
+if(PDF){var d0=docInfo();$("fr").textContent=d0.file||"Documento";}
 </script>
 </body>
 </html>
