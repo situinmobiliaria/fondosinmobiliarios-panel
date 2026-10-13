@@ -78,6 +78,10 @@ h1{font-size:21px;font-weight:400;margin:0 0 8px;text-align:center;letter-spacin
 #pdfv .bar button{color:var(--acc);background:none;border:0;cursor:pointer;font:inherit;padding:0}
 #pdfv .bar button:hover{text-decoration:underline}
 #pdfv iframe{flex:1;border:0;width:100%}
+#pages{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:#e9e9e9;padding:10px 0;display:none}
+#pages canvas{display:block;margin:0 auto 10px;width:calc(100% - 16px);height:auto;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+#pages .pm{text-align:center;font-size:12px;color:var(--mut);padding:8px}
+@media (max-width:760px){#pdfv .bar{padding:10px 12px;gap:14px}#pdfv .bar b{font-size:12px}#pdfv .bar button{font-size:14px}}
 #out{position:fixed;inset:0;background:var(--bg);opacity:0;pointer-events:none;transition:opacity .35s;z-index:9}
 #out.on{opacity:1}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;z-index:8}
@@ -115,7 +119,7 @@ h1{font-size:21px;font-weight:400;margin:0 0 8px;text-align:center;letter-spacin
   </div>
 </div>
 
-<div id="pdfv"><div class="bar"><b id="pname"></b><button id="dl">Descargar PDF</button><button id="cerrar">Cerrar</button></div><iframe id="pframe" title="Documento PDF"></iframe></div>
+<div id="pdfv"><div class="bar"><b id="pname"></b><button id="dl">Descargar PDF</button><button id="cerrar">Cerrar</button></div><iframe id="pframe" title="Documento PDF"></iframe><div id="pages"></div></div>
 <div id="out"></div>
 
 <script>
@@ -277,10 +281,31 @@ function openPdf(b64,done){
   var url=URL.createObjectURL(new Blob([u],{type:"application/pdf"})),name=PDF.split("/").pop();
   done();
   setTimeout(function(){
-    document.title=name;$("pname").textContent=name;$("pframe").src=url;$("pdfv").style.display="flex";$("out").classList.remove("on");
+    document.title=name;$("pname").textContent=name;$("pdfv").style.display="flex";$("out").classList.remove("on");
+    // en celulares el navegador no muestra PDF dentro de la página: se dibujan las páginas con pdf.js
+    var movil=navigator.pdfViewerEnabled===false||matchMedia("(pointer:coarse) and (max-width:900px)").matches;
+    if(movil){$("pframe").style.display="none";$("pages").style.display="block";renderPages(u);}
+    else $("pframe").src=url;
     $("dl").onclick=function(){var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
     $("cerrar").onclick=function(){if(window.opener||history.length<2)window.close();location.href=location.pathname;};
   },850);
+}
+
+function renderPages(u){
+  var box=$("pages");box.innerHTML='<div class="pm">Preparando páginas…</div>';
+  var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+  sc.onload=function(){
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    pdfjsLib.getDocument({data:u.slice()}).promise.then(async function(pdf){
+      box.innerHTML="";var W=(box.clientWidth-16)*Math.min(window.devicePixelRatio||1,2);
+      for(var p=1;p<=pdf.numPages;p++){var pg=await pdf.getPage(p),v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:W/v0.width});
+        var c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;box.appendChild(c);
+        await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;}
+      var m=document.createElement("div");m.className="pm";m.textContent=pdf.numPages+" páginas";box.appendChild(m);
+    }).catch(function(e){box.innerHTML='<div class="pm">No se pudo mostrar el documento. Usa “Descargar PDF”.</div>';});
+  };
+  sc.onerror=function(){box.innerHTML='<div class="pm">No se pudo cargar el visor. Usa “Descargar PDF”.</div>';};
+  document.head.appendChild(sc);
 }
 
 function backToLogin(m){
