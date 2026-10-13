@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Fondos Inmobiliarios SITU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--ink:#222;--mut:#6b6b6b;--line:#dcdcdc;--acc:#96323C}
+*{box-sizing:border-box;font-family:Roboto,Arial,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink)}
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:420px;border:1px solid var(--line);border-top:4px solid var(--acc);padding:32px 28px;text-align:center}
+.logos{display:flex;justify-content:center;align-items:center;gap:20px;margin-bottom:22px}
+.logos img{height:34px;filter:grayscale(1)}
+h1{font-size:20px;font-weight:500;margin:0 0 6px}
+p{font-size:14px;color:var(--mut);margin:0 0 22px;line-height:1.45}
+#gbtn{display:flex;justify-content:center;min-height:44px}
+#msg{font-size:13px;margin-top:16px;min-height:18px;color:var(--mut)}
+#msg.err{color:var(--acc)}
+#bar{position:sticky;top:0;z-index:2;background:#fff;padding:8px 12px;font-size:13px;border-bottom:3px solid var(--acc);display:flex;gap:12px;align-items:center}
+#bar button{color:var(--acc);background:none;border:0;cursor:pointer;font:inherit;text-decoration:underline;padding:0}
+#pdfv{display:none;height:100%;flex-direction:column}
+#pdfv iframe{flex:1;border:0;width:100%}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGsi()"></script>
+</head>
+<body>
+<div id="login">
+  <div class="card">
+    <div class="logos"><img src="situ.png" alt="SITU"><img src="aspen.png" alt="Aspen Capital"></div>
+    <h1>Fondos de Inversión Inmobiliarios</h1>
+    <p>Acceso exclusivo para cuentas <b>@situ.cl</b>.<br>Inicia sesión con tu cuenta Google de SITU.</p>
+    <div id="gbtn"></div>
+    <div id="msg"></div>
+  </div>
+</div>
+<div id="pdfv"><div id="bar"><b id="pname"></b><button id="dl">Descargar PDF</button><button id="salir">Cerrar sesión</button></div><iframe id="pframe" title="PDF"></iframe></div>
+<script>
+var CLIENT_ID = "138206776381-eep6qsc0nu0ceb2k6gjd6mgbk10d3c7g.apps.googleusercontent.com";
+var API = "https://script.google.com/macros/s/AKfycbw2paSycuLxl7SMN4rs1fjsA7XU8p1wSXCVvP5Q73zU580DWEXFGrSHSms5lbGhQoWE/exec";
+var KEY = "situ_fondos_idt";
+var PDF = new URLSearchParams(location.search).get("pdf");
+
+function msg(t, err){var m=document.getElementById("msg");m.textContent=t||"";m.className=err?"err":"";}
+function saved(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&o.exp*1000>Date.now()+60000)return o.t;}catch(e){}return null;}
+function save(t){try{var p=JSON.parse(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));localStorage.setItem(KEY,JSON.stringify({t:t,exp:p.exp}));}catch(e){}}
+function clear(){try{localStorage.removeItem(KEY);}catch(e){}}
+
+function api(t, body){
+  body.t = t;
+  return fetch(API,{method:"POST",body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+
+function load(t){
+  msg(PDF ? "Abriendo documento…" : "Cargando panel…");
+  api(t, PDF ? {op:"pdf", pdf:PDF} : {op:"panel"}).then(function(r){
+    if(!r.ok){
+      if(r.err==="auth"){clear();msg(r.msg||"Sesión no válida. Vuelve a iniciar sesión.",true);renderBtn();return;}
+      msg(r.msg||"No se pudo cargar.",true);return;
+    }
+    if(PDF) return showPdf(r.b64);
+    document.open();document.write(r.html);document.close();
+  }).catch(function(e){msg("Error de conexión: "+e.message,true);});
+}
+
+function showPdf(b64){
+  var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  var url=URL.createObjectURL(new Blob([u],{type:"application/pdf"}));
+  var name=PDF.split("/").pop();
+  document.title=name;
+  document.getElementById("login").style.display="none";
+  document.getElementById("pdfv").style.display="flex";
+  document.getElementById("pname").textContent=name;
+  document.getElementById("pframe").src=url;
+  document.getElementById("dl").onclick=function(){var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
+  document.getElementById("salir").onclick=function(){clear();location.href=location.pathname;};
+}
+
+function onCred(resp){save(resp.credential);load(resp.credential);}
+
+function renderBtn(){
+  document.getElementById("gbtn").innerHTML="";
+  google.accounts.id.renderButton(document.getElementById("gbtn"),{theme:"outline",size:"large",text:"signin_with",shape:"rectangular",locale:"es"});
+}
+
+function initGsi(){
+  google.accounts.id.initialize({client_id:CLIENT_ID,callback:onCred,auto_select:true,hd:"situ.cl",ux_mode:"popup"});
+  var t=saved();
+  if(t){load(t);return;}
+  renderBtn();
+  google.accounts.id.prompt();
+}
+</script>
+</body>
+</html>
