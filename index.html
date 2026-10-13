@@ -207,9 +207,20 @@ function expected(){
   var s=parseInt(ls(KSZ)||"0",10); return s>0?s:(PDF?0:2400000);
 }
 
+// fetch con reintentos: si la conexión se corta (p. ej. "Failed to fetch"), vuelve a intentar hasta 3 veces
+function post(body,n){
+  n=n||1;
+  return fetch(API,{method:"POST",body:body,credentials:"omit",cache:"no-store"}).then(function(r){
+    if(!r.ok&&r.status>=500)throw new TypeError("HTTP "+r.status);return r;
+  }).catch(function(e){
+    if(n>=3||!(e instanceof TypeError))throw e;
+    $("sz").textContent="Reintentando conexión ("+(n+1)+" de 3)…";
+    return new Promise(function(res){setTimeout(res,1200*n);}).then(function(){return post(body,n+1);});
+  });
+}
 function fetchData(t){
   var body=JSON.stringify(PDF?{op:"pdf",pdf:PDF,t:t}:{op:"panel",t:t});
-  fetch(API,{method:"POST",body:body}).then(function(r){
+  post(body).then(function(r){
     clearInterval(waitTimer);
     if(P.cur<3){step(3);}
     setTarget(58);
@@ -249,7 +260,7 @@ function fetchData(t){
   }).catch(function(e){
     clearInterval(waitTimer);
     var li=$("s"+P.cur);if(li)li.className="";
-    $("eLoad").innerHTML="No se pudo completar la carga ("+String(e.message||e).replace(/</g,"&lt;")+").<br>";
+    $("eLoad").innerHTML="No se pudo completar la carga ("+String(e.message||e).replace(/</g,"&lt;")+"), después de 3 intentos. Revisa tu conexión o desactiva extensiones que bloqueen script.google.com.<br>";
     var b=document.createElement("button");b.className="btn";b.textContent="Reintentar";b.onclick=function(){startLoading(t);};
     $("eLoad").appendChild(b);$("eLoad").classList.add("on");
   });
