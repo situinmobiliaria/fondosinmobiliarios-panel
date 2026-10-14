@@ -127,7 +127,7 @@ var CLIENT_ID = "138206776381-eep6qsc0nu0ceb2k6gjd6mgbk10d3c7g.apps.googleuserco
 var API = "https://script.google.com/macros/s/AKfycbw2paSycuLxl7SMN4rs1fjsA7XU8p1wSXCVvP5Q73zU580DWEXFGrSHSms5lbGhQoWE/exec";
 var KEY = "situ_fondos_idt", KSZ = "situ_fondos_sz";
 var Q = new URLSearchParams(location.search);
-var PDF = Q.get("pdf"), KB = parseInt(Q.get("kb") || "0", 10) || 0;
+var PDF = Q.get("pdf"), KB = parseInt(Q.get("kb") || "0", 10) || 0, PAGE = parseInt(Q.get("page") || "0", 10) || 0;
 
 function $(id){return document.getElementById(id);}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
@@ -147,6 +147,7 @@ function docInfo(){
   if(m){
     var meses=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
     tags.push("Fondo "+m[1]);tags.push(meses[+m[4]-1]+"-"+m[3]);tags.push(TIPOS[m[5]]||"Factsheet / reporte");
+    if(PAGE)tags.push("pág. "+PAGE);
     return {nm:m[2].replace(/-/g," "),tags:tags,badge:"PDF",file:f};
   }
   return {nm:f,tags:tags,badge:"PDF",file:f};
@@ -285,7 +286,7 @@ function openPdf(b64,done){
     // en celulares el navegador no muestra PDF dentro de la página: se dibujan las páginas con pdf.js
     var movil=navigator.pdfViewerEnabled===false||matchMedia("(pointer:coarse) and (max-width:900px)").matches;
     if(movil){$("pframe").style.display="none";$("pages").style.display="block";renderPages(u);}
-    else $("pframe").src=url;
+    else $("pframe").src=url+(PAGE?"#page="+PAGE:"");
     $("dl").onclick=function(){var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();};
     $("cerrar").onclick=function(){if(window.opener||history.length<2)window.close();location.href=location.pathname;};
   },850);
@@ -302,6 +303,7 @@ function renderPages(u){
         var c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;box.appendChild(c);
         await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;}
       var m=document.createElement("div");m.className="pm";m.textContent=pdf.numPages+" páginas";box.appendChild(m);
+      if(PAGE&&box.children[PAGE-1])box.children[PAGE-1].scrollIntoView();
     }).catch(function(e){box.innerHTML='<div class="pm">No se pudo mostrar el documento. Usa “Descargar PDF”.</div>';});
   };
   sc.onerror=function(){box.innerHTML='<div class="pm">No se pudo cargar el visor. Usa “Descargar PDF”.</div>';};
